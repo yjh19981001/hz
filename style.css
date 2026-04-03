@@ -140,5 +140,6 @@ button:disabled{opacity:.5;cursor:not-allowed}
 }
 .player.active { outline: 2px solid #f6dc89; }
 .small { color: var(--muted); font-size: 13px; }
+.small a { color: #8dc5ff; }
 .discard-grid { display:flex; gap:8px; flex-wrap: wrap; margin: 8px 0; }
 dialog { border: 1px solid #735d2a; border-radius: 8px; background: #1a2234; color: #f7efda; }

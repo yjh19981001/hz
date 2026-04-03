@@ -53,9 +53,11 @@
       <p class="small">可粘贴你自己有授权的图片 JSON（不会内置官方素材）。</p>
       <textarea id="assetInput" rows="5" style="width:100%" placeholder='{"cardArt":{"1":"https://.../lv1.jpg","2":"https://.../lv2.jpg","3":"https://.../lv3.jpg"}}'></textarea>
       <div class="action-row">
+        <button id="loadOgaPresetBtn">加载开源素材包（OGA CC0）</button>
         <button id="applyAssetsBtn">应用素材包</button>
         <button id="clearAssetsBtn">清空素材包</button>
       </div>
+      <div id="assetCredits" class="small"></div>
     </section>
 
     <section class="players" id="players"></section>

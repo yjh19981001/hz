@@ -3,6 +3,18 @@ const TOKEN_TYPES = [...COLORS, "pearl", "gold"];
 const SPIRAL = [
   [2,2],[2,3],[2,4],[3,4],[4,4],[4,3],[4,2],[4,1],[4,0],[3,0],[2,0],[1,0],[0,0],[0,1],[0,2],[0,3],[0,4],[1,4],[1,3],[1,2],[1,1],[2,1],[3,1],[3,2],[3,3]
 ];
+const OGA_PRESET = {
+  cardArt: {
+    "1": "https://opengameart.org/sites/default/files/FelisChaus_ParchmentBackground.jpg",
+    "2": "https://opengameart.org/sites/default/files/chalkboardtex.png",
+    "3": "https://opengameart.org/sites/default/files/monochrome_gradient_3.jpg"
+  },
+  credits: [
+    { name: "Parchment background", author: "Felis Chaus", license: "CC0", page: "https://opengameart.org/content/parchment-background" },
+    { name: "Chalkboard Texture", author: "MonoTone", license: "CC0", page: "https://opengameart.org/content/chalkboard-texture" },
+    { name: "CC0 Monochrome Gradient Textures", author: "PuzzleAndy", license: "CC0", page: "https://opengameart.org/content/cc0-monochrome-gradient-textures" }
+  ]
+};
 
 const state = {
   board: Array.from({ length: 5 }, () => Array(5).fill(null)),
@@ -82,6 +94,11 @@ function init(){
   state.players[1-state.firstPlayer].privileges = 1;
 
   bind();
+  const input = document.getElementById("assetInput");
+  if (input && Object.keys(state.assetPack.cardArt || {}).length) {
+    input.value = JSON.stringify(state.assetPack, null, 2);
+  }
+  renderAssetCredits();
   render();
 }
 
@@ -99,6 +116,7 @@ function bind(){
   document.getElementById("cancelSelectionBtn").onclick = clearSelection;
   document.getElementById("discardDoneBtn").onclick = finishDiscard;
   document.getElementById("nextPlayerBtn").onclick = ()=>{ document.getElementById("betweenTurns").close(); render(); };
+  document.getElementById("loadOgaPresetBtn").onclick = loadOgaPreset;
   document.getElementById("applyAssetsBtn").onclick = applyAssetPack;
   document.getElementById("clearAssetsBtn").onclick = clearAssetPack;
 }
@@ -487,28 +505,46 @@ function loadAssetPack(){
     const raw = localStorage.getItem("splendorDuelAssets");
     if(!raw) return;
     const parsed = JSON.parse(raw);
-    if(parsed && typeof parsed === "object") state.assetPack = { cardArt: parsed.cardArt || {} };
+    if(parsed && typeof parsed === "object") state.assetPack = { cardArt: parsed.cardArt || {}, credits: parsed.credits || [] };
   }catch(_){ /* ignore broken storage */ }
+}
+function loadOgaPreset(){
+  state.assetPack = JSON.parse(JSON.stringify(OGA_PRESET));
+  localStorage.setItem("splendorDuelAssets", JSON.stringify(state.assetPack));
+  const el = document.getElementById("assetInput");
+  if (el) el.value = JSON.stringify(state.assetPack, null, 2);
+  info("已加载 OGA 开源 CC0 素材包。");
+  renderAssetCredits();
+  render();
 }
 function applyAssetPack(){
   const el = document.getElementById("assetInput");
   try{
     const parsed = JSON.parse(el.value || "{}");
-    state.assetPack = { cardArt: parsed.cardArt || {} };
+    state.assetPack = { cardArt: parsed.cardArt || {}, credits: parsed.credits || [] };
     localStorage.setItem("splendorDuelAssets", JSON.stringify(state.assetPack));
     info("素材包已应用。仅建议使用你有授权的图片资源。");
+    renderAssetCredits();
     render();
   }catch(_){
     info("素材包 JSON 格式错误。");
   }
 }
 function clearAssetPack(){
-  state.assetPack = { cardArt: {} };
+  state.assetPack = { cardArt: {}, credits: [] };
   localStorage.removeItem("splendorDuelAssets");
   const el = document.getElementById("assetInput");
   if(el) el.value = "";
   info("素材包已清空。");
+  renderAssetCredits();
   render();
+}
+function renderAssetCredits(){
+  const creditsEl = document.getElementById("assetCredits");
+  const list = state.assetPack.credits || [];
+  if(!creditsEl) return;
+  if(!list.length){ creditsEl.innerHTML = ""; return; }
+  creditsEl.innerHTML = `当前素材来源：` + list.map(c=>`<a href="${c.page}" target="_blank" rel="noreferrer">${c.name}</a> / ${c.author} / ${c.license}`).join(" ｜ ");
 }
 
 window.onReserveCardClick = onReserveCardClick;
