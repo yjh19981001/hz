@@ -61,20 +61,56 @@ main {
 .pyramid-level { display: flex; gap: 8px; flex-wrap: wrap; }
 .card, .royal {
   width: 142px;
-  min-height: 88px;
+  min-height: 176px;
   border-radius: 8px;
-  padding: 6px;
-  border: 1px solid #76602c;
-  background: linear-gradient(155deg, #ece3cc, #d7c8a0);
+  padding: 8px;
+  border: 1px solid #7e652f;
+  background: linear-gradient(155deg, #f2e8cf, #d8c7a0);
   color: #1d2333;
   font-size: 12px;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 14px rgba(0,0,0,.35), inset 0 0 0 1px rgba(255,255,255,.35);
+}
+.card::before, .royal::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(121, 90, 31, .45);
+  border-radius: 6px;
+  pointer-events: none;
 }
 .card.selected { outline: 3px solid #e8b738; }
-.card .top { display: flex; justify-content: space-between; font-weight: 700; }
+.card .top { display: flex; justify-content: space-between; font-weight: 700; margin-bottom: 6px; }
+.card .art {
+  height: 72px;
+  border-radius: 6px;
+  border: 1px solid rgba(36, 38, 50, .25);
+  margin-bottom: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.card .art::after{
+  content:"";
+  position:absolute; inset:0;
+  background:
+    radial-gradient(circle at 22% 28%, rgba(255,255,255,.42), transparent 44%),
+    radial-gradient(circle at 78% 68%, rgba(255,255,255,.22), transparent 48%);
+}
+.art .gem {
+  position:absolute;
+  width:32px;height:32px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.5);
+  box-shadow: inset 0 0 10px rgba(255,255,255,.25), 0 4px 8px rgba(0,0,0,.35);
+}
+.art .gem.a{left:14px;top:16px}.art .gem.b{right:14px;bottom:12px}
+.card .ability { font-size: 11px; margin-bottom: 6px; }
 .card .cost { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
 .pill { padding: 1px 5px; border-radius: 999px; color: #fff; font-size: 11px; }
 .pill.white,.pill.pearl{color:#222}
+.pill.blue{background:#3170c9}.pill.red{background:#a63535}.pill.green{background:#2f7a4f}
+.pill.black{background:#1f2937}.pill.white{background:#ddd}.pill.pearl{background:#d9f0f2}.pill.gold{background:#d8a12c}
 
 .action-row, .board-header, .board-actions {
   display: flex;

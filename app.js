@@ -443,12 +443,20 @@ function renderPyramid(){
 }
 function renderCard(card, cb, selected){
   const d=document.createElement("div"); d.className=`card ${selected?"selected":""}`; if(!card){ d.textContent="空"; return d; }
+  const gemClass = `token-${card.ability==="mimic" ? "gold" : card.bonus}`;
+  const levelBadge = "◆".repeat(Math.max(1, card.level));
   d.innerHTML=`<div class="top"><span>⭐${card.points||0}</span><span>👑${card.crowns||0}</span><span>${labelBonus(card)}</span></div>
-  <div>${abilityText(card.ability)}</div><div class="cost">${Object.entries(card.cost).map(([k,v])=>`<span class="pill ${k}">${k}×${v}</span>`).join("")}</div>`;
+  <div class="art">
+    <div class="gem a ${gemClass}"></div>
+    <div class="gem b ${gemClass}"></div>
+  </div>
+  <div class="ability">${abilityText(card.ability)} ｜ 阶级 ${levelBadge}</div>
+  <div class="cost">${Object.entries(card.cost).map(([k,v])=>`<span class="pill ${k}">${costLabel(k)}×${v}</span>`).join("")}</div>`;
   d.onclick=cb; return d;
 }
 function labelBonus(card){ return card.ability==="mimic" ? "仿色" : `加成:${card.bonus}`; }
 function abilityText(a){ return ({extra:"能力:再行动",mimic:"能力:仿色",gainColor:"能力:拿同色",privilege:"能力:+卷轴",steal:"能力:偷1"}[a]||"能力:无"); }
+function costLabel(t){ return ({blue:"蓝",white:"白",green:"绿",black:"黑",red:"红",pearl:"珍珠",gold:"金"}[t]||t); }
 function renderRoyals(){
   document.getElementById("royals").innerHTML = state.royals.map(r=>`<div class="royal">皇家卡 ${r.id}<br>⭐${r.points}<br>${abilityText(r.ability)}</div>`).join("");
 }
