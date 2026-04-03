@@ -90,7 +90,11 @@ main {
   margin-bottom: 6px;
   position: relative;
   overflow: hidden;
+  background: linear-gradient(140deg, #55607a, #31394d);
+  background-size: cover;
+  background-position: center;
 }
+.card .art.use-image .gem{opacity:.28}
 .card .art::after{
   content:"";
   position:absolute; inset:0;

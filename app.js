@@ -19,6 +19,7 @@ const state = {
   pendingDiscard: false,
   extraTurn: false,
   pendingEndExtra: false,
+  assetPack: { cardArt: {} },
 };
 
 function mkPlayer(name){
@@ -56,6 +57,7 @@ function makeDeck(level, count){
 }
 
 function init(){
+  loadAssetPack();
   state.decks[1]=makeDeck(1,30); state.decks[2]=makeDeck(2,24); state.decks[3]=makeDeck(3,13);
   state.royals = shuffle([
     {id:"R1", points:2, ability:"privilege"},
@@ -97,6 +99,8 @@ function bind(){
   document.getElementById("cancelSelectionBtn").onclick = clearSelection;
   document.getElementById("discardDoneBtn").onclick = finishDiscard;
   document.getElementById("nextPlayerBtn").onclick = ()=>{ document.getElementById("betweenTurns").close(); render(); };
+  document.getElementById("applyAssetsBtn").onclick = applyAssetPack;
+  document.getElementById("clearAssetsBtn").onclick = clearAssetPack;
 }
 
 function setMode(m){ state.selection.mode = m; state.selection.cells=[]; state.selection.card=null; state.selection.reserveDeck=null; render(); }
@@ -445,8 +449,9 @@ function renderCard(card, cb, selected){
   const d=document.createElement("div"); d.className=`card ${selected?"selected":""}`; if(!card){ d.textContent="空"; return d; }
   const gemClass = `token-${card.ability==="mimic" ? "gold" : card.bonus}`;
   const levelBadge = "◆".repeat(Math.max(1, card.level));
+  const artUrl = (state.assetPack.cardArt || {})[String(card.level)] || "";
   d.innerHTML=`<div class="top"><span>⭐${card.points||0}</span><span>👑${card.crowns||0}</span><span>${labelBonus(card)}</span></div>
-  <div class="art">
+  <div class="art ${artUrl ? "use-image" : ""}" style="${artUrl ? `background-image:url('${artUrl}')` : ""}">
     <div class="gem a ${gemClass}"></div>
     <div class="gem b ${gemClass}"></div>
   </div>
@@ -477,6 +482,34 @@ function renderSelectionInfo(){
   document.getElementById("selectionInfo").textContent = txt;
 }
 function labelToken(t){ return ({blue:"蓝",white:"白",green:"绿",black:"黑",red:"红",pearl:"珠",gold:"金"}[t]); }
+function loadAssetPack(){
+  try{
+    const raw = localStorage.getItem("splendorDuelAssets");
+    if(!raw) return;
+    const parsed = JSON.parse(raw);
+    if(parsed && typeof parsed === "object") state.assetPack = { cardArt: parsed.cardArt || {} };
+  }catch(_){ /* ignore broken storage */ }
+}
+function applyAssetPack(){
+  const el = document.getElementById("assetInput");
+  try{
+    const parsed = JSON.parse(el.value || "{}");
+    state.assetPack = { cardArt: parsed.cardArt || {} };
+    localStorage.setItem("splendorDuelAssets", JSON.stringify(state.assetPack));
+    info("素材包已应用。仅建议使用你有授权的图片资源。");
+    render();
+  }catch(_){
+    info("素材包 JSON 格式错误。");
+  }
+}
+function clearAssetPack(){
+  state.assetPack = { cardArt: {} };
+  localStorage.removeItem("splendorDuelAssets");
+  const el = document.getElementById("assetInput");
+  if(el) el.value = "";
+  info("素材包已清空。");
+  render();
+}
 
 window.onReserveCardClick = onReserveCardClick;
 window.discardOne = discardOne;
