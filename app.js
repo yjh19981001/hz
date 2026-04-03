@@ -18,6 +18,7 @@ const state = {
   optionalUsed: { privilege: false, refill: false },
   pendingDiscard: false,
   extraTurn: false,
+  pendingEndExtra: false,
 };
 
 function mkPlayer(name){
@@ -305,7 +306,17 @@ function takeFromBoard(color){
 
 function endMandatory(extra=false){
   clearSelection();
-  enforceTokenLimit();
+  state.pendingEndExtra = extra;
+  if (enforceTokenLimit()) {
+    render();
+    return;
+  }
+  resolvePostMandatory();
+}
+
+function resolvePostMandatory(){
+  const extra = state.pendingEndExtra;
+  state.pendingEndExtra = false;
   const winner = checkVictory(cur());
   if(winner){ render(); alert(`${cur().name} 获胜！条件：${winner}`); return; }
   if(extra){ state.extraTurn = true; render(); return; }
@@ -319,24 +330,41 @@ function endMandatory(extra=false){
 
 function enforceTokenLimit(){
   const p=cur();
-  let total = tokenTotal(p);
-  if(total<=10) return;
+  const total = tokenTotal(p);
+  if(total<=10) return false;
   state.pendingDiscard = true;
   const dialog=document.getElementById("discardDialog");
-  while(total>10){
-    const pick=[...TOKEN_TYPES].find(t=>p.tokens[t]>0);
-    p.tokens[pick]--; state.bag.push(pick); total--;
-  }
-  document.getElementById("discardInfo").textContent="已自动弃置到 10（实现简化）。";
+  document.getElementById("discardInfo").textContent=`你有 ${total} 枚 token，需弃置到 10 枚。`;
   renderDiscardChoices();
   dialog.showModal();
+  return true;
 }
 
 function renderDiscardChoices(){
   const p=cur();
-  document.getElementById("discardChoices").innerHTML = TOKEN_TYPES.map(t=>`<span class="pill ${t}">${t}:${p.tokens[t]}</span>`).join("");
+  const total = tokenTotal(p);
+  const remain = Math.max(0, total - 10);
+  document.getElementById("discardChoices").innerHTML = TOKEN_TYPES.map(
+    t=>`<button ${p.tokens[t]===0?"disabled":""} onclick="discardOne('${t}')">${labelToken(t)} (${p.tokens[t]})</button>`
+  ).join("");
+  const done = document.getElementById("discardDoneBtn");
+  done.disabled = remain !== 0;
+  done.textContent = remain === 0 ? "完成弃置" : `还需弃置 ${remain} 枚`;
 }
-function finishDiscard(){ document.getElementById("discardDialog").close(); state.pendingDiscard=false; render(); }
+function discardOne(t){
+  const p = cur();
+  if (!state.pendingDiscard || p.tokens[t] <= 0) return;
+  p.tokens[t]--;
+  state.bag.push(t);
+  renderDiscardChoices();
+  render();
+}
+function finishDiscard(){
+  if (tokenTotal(cur()) > 10) return;
+  document.getElementById("discardDialog").close();
+  state.pendingDiscard=false;
+  resolvePostMandatory();
+}
 
 function checkVictory(p){
   const mono = COLORS.some(c=>p.cards.filter(x=>(x.ability==="mimic"?bestColor(p):x.bonus)===c).reduce((s,x)=>s+(x.points||0),0)>=10);
@@ -352,7 +380,6 @@ function allSame(arr){ return arr.every(x=>x===arr[0]); }
 function grantPrivilege(p,n){
   for(let i=0;i<n;i++){
     if(state.privileges>0){ state.privileges--; p.privileges++; }
-    else if(opp().privileges>0 && p!==opp()){ opp().privileges--; p.privileges++; }
   }
 }
 
@@ -433,7 +460,7 @@ function renderPlayers(){
     <div class="small">Bonus: ${COLORS.map(c=>`${c}:${p.bonuses[c]}`).join(" ")}</div>
     <div class="small">Token: ${TOKEN_TYPES.map(t=>`${t}:${p.tokens[t]}`).join(" ")}</div>
     <div class="small">已购卡:${p.cards.length} ｜ 预定:${p.reserved.length}</div>
-    <div>${p.reserved.map((c,i)=>`<button onclick="onReserveCardClick(${i})">预定#${i+1}</button>`).join("")}</div>
+    <div>${idx===state.current ? p.reserved.map((c,i)=>`<button onclick="onReserveCardClick(${i})">预定#${i+1}</button>`).join("") : "<span class='small'>对手预定卡已隐藏</span>"}</div>
   </div>`).join("");
 }
 function renderSelectionInfo(){
@@ -444,4 +471,5 @@ function renderSelectionInfo(){
 function labelToken(t){ return ({blue:"蓝",white:"白",green:"绿",black:"黑",red:"红",pearl:"珠",gold:"金"}[t]); }
 
 window.onReserveCardClick = onReserveCardClick;
+window.discardOne = discardOne;
 init();
