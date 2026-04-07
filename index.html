@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>璀璨宝石：对决（网页版）</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>璀璨宝石：对决（网页实现）</h1>
+    <p>双人本地对战 · 按官方规则核心流程实现</p>
+  </header>
+
+  <main>
+    <section class="panel status" id="statusPanel"></section>
+
+    <section class="panel board-wrap">
+      <div class="board-header">
+        <h2>宝石版图</h2>
+        <div class="board-actions">
+          <button id="optionalPrivilegeBtn">可选1：使用特权卷轴</button>
+          <button id="optionalRefillBtn">可选2：补充版图</button>
+        </div>
+      </div>
+      <div id="board" class="board"></div>
+      <div class="legend">点击版图上的 token 进行选择；强制行动完成后自动结算回合。</div>
+    </section>
+
+    <section class="panel cards">
+      <h2>宝石卡金字塔</h2>
+      <div id="pyramid" class="pyramid"></div>
+      <h3>皇家卡（3 王冠 / 6 王冠）</h3>
+      <div id="royals" class="royals"></div>
+    </section>
+
+    <section class="panel actions">
+      <h2>强制行动</h2>
+      <div class="action-row">
+        <button id="takeTokensBtn">拿取至多 3 枚（相邻直线）</button>
+        <button id="reserveBtn">拿 1 金 + 预定 1 张卡</button>
+        <button id="buyBtn">购买 1 张宝石卡</button>
+      </div>
+      <div class="action-row">
+        <button id="confirmSelectionBtn">确认当前选择</button>
+        <button id="cancelSelectionBtn">清空选择</button>
+      </div>
+      <div id="selectionInfo" class="selection-info"></div>
+    </section>
+
+    <section class="panel">
+      <h2>素材包（自备）</h2>
+      <p class="small">可粘贴你自己有授权的图片 JSON（不会内置官方素材）。</p>
+      <textarea id="assetInput" rows="5" style="width:100%" placeholder='{"cardArt":{"1":"https://.../lv1.jpg","2":"https://.../lv2.jpg","3":"https://.../lv3.jpg"}}'></textarea>
+      <div class="action-row">
+        <button id="loadOgaPresetBtn">加载开源素材包（OGA CC0）</button>
+        <button id="applyAssetsBtn">应用素材包</button>
+        <button id="clearAssetsBtn">清空素材包</button>
+      </div>
+      <div id="assetCredits" class="small"></div>
+    </section>
+
+    <section class="players" id="players"></section>
+  </main>
+
+  <dialog id="discardDialog">
+    <h3>超过 10 枚 token，请弃置</h3>
+    <p id="discardInfo"></p>
+    <div id="discardChoices" class="discard-grid"></div>
+    <button id="discardDoneBtn">完成弃置</button>
+  </dialog>
+
+  <dialog id="betweenTurns">
+    <h3>回合切换</h3>
+    <p id="betweenText"></p>
+    <button id="nextPlayerBtn">下一位玩家查看</button>
+  </dialog>
+
+  <script src="app.js"></script>
+</body>
+</html>
